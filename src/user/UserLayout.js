@@ -46,14 +46,26 @@ class AllUsers extends Component{
         })
     }
 
-    onDeleteRow = (row) => {
-        this.users = this.users.filter((user) => {
-          return user.id !== row[0];
-        });
+    onDeleteRow = (rows) => {
+        fetch("/api/user/" + rows[0], {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(rows[0]),
+        }).then(results => {
+            if(results.ok){
+                this.users = this.users.filter((user) => {
+                  return user.userId !== rows[0];
+                });
 
-        this.setState({
-          data: this.users
-        });
+                this.setState({
+                  data: this.users
+                });
+            }
+        })
+
     }
 
     render() {
@@ -75,7 +87,7 @@ class UsersTable extends React.Component {
         };
         const selectRow = {
             mode: 'radio',
-            hideSelectColumn: true,
+            hideSelectColumn: false,
             bgColor: 'lightgray',
             clickToSelect: true
         };
