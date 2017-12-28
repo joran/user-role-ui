@@ -25,110 +25,35 @@ import React, { Component } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
 
-const RoleLayout = () => (
-    <Switch>
-      <Route exact path='/role' component={AllRoles}/>
-    </Switch>
- )
-
-class AllRoles extends Component{
-    constructor(props) {
-        super(props);
-        this.roles = [];
-        this.state = { data: this.roles};
-    }
-
-    componentDidMount(){
-        fetch("/api/role")
-        .then(results => {
-            return results.json();
-        }).then(data => {
-            this.roles = data;
-            this.setState({data:this.roles});
-        })
-
-    }
-
-    onAddRow = (row) => {
-        fetch("/api/role", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(row),
-        })
-        .then(results => {
-            return results.json();
-        }).then(data => {
-            console.log("onAddRow", row, data);
-            this.roles.push(data);
-            this.setState({
-              data: this.roles
-            });
-        })
-    }
-
-    onDeleteRow = (rows) => {
-        fetch("/api/role/" + rows[0], {
-            method: "DELETE",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(rows[0]),
-        }).then(results => {
-            if(results.ok){
-                console.log("onDeleteRow", rows[0]);
-                this.roles = this.roles.filter((role) => {
-                  return role.id !== rows[0];
-                });
-
-                this.setState({
-                  data: this.roles
-                });
-            }
-        })
-    }
-
-    render() {
-        return(
-            <RolesTable roles={this.state.data}
-                onAddRow={ this.onAddRow }
-                onDeleteRow={ this.onDeleteRow }
-            />
-        )
-    }
-}
-
-
-
 class RolesTable extends React.Component {
+     onAfterSaveCell = (row, cellName, cellValue) => {
+        console.log("onAfterSaveCell", row, cellName, cellValue);
+        this.props.onUpdateRow(row);
+    }
     render() {
-        const cellEditProp = {
-          mode: 'click'
-        };
-        const selectRow = {
-            mode: 'radio',
-            hideSelectColumn: false,
-            bgColor: 'lightgray',
-            clickToSelect: true
-        };
         return (
           <BootstrapTable
             data = { this.props.roles }
-            selectRow={ selectRow }
-            remote={ this._remote }
+            selectRow={ {
+                mode: 'radio',
+                hideSelectColumn: false,
+                bgColor: 'lightgray',
+                clickToSelect: true
+            } }
             tableBodyClass="table-striped"
-            insertRow deleteRow search pagination
-            cellEdit={ cellEditProp }
+            cellEdit={ {
+                mode: 'click',
+                blurToSave: true,
+                afterSaveCell: this.onAfterSaveCell  // a hook for after saving cell
+            } }
             options={ {
-                onCellEdit: this.props.onCellEdit,
                 onDeleteRow: this.props.onDeleteRow,
                 onAddRow: this.props.onAddRow,
-                defaultSortName: 'rolename',  // default sort column name
-                defaultSortOrder: 'asc'  // default sort order
-            } }>
+                defaultSortName: 'rolename',
+                defaultSortOrder: 'asc'
+            } }
+            insertRow deleteRow search pagination
+            >
 
             <TableHeaderColumn dataField='id' isKey hiddenOnInsert hidden={ true }>id</TableHeaderColumn>
             <TableHeaderColumn dataField='rolename' dataSort>Roll</TableHeaderColumn>
@@ -146,5 +71,103 @@ class RolesTable extends React.Component {
     }
 }
 
-export default RoleLayout;
+class AllRoles extends Component{
+    constructor(props) {
+        super(props);
+        this.state = { roles: []};
+    }
+
+    componentDidMount(){
+        fetch("/api/role")
+        .then(results => {
+            return results.json();
+        }).then(roles => {
+            this.setState({roles:roles});
+        })
+    }
+
+    onAddRow = (row) => {
+        fetch("/api/role", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(row),
+        })
+        .then(results => {
+            return results.json();
+        }).then(addedRole => {
+            console.log("onAddRow", row, addedRole);
+            this.setState({
+              roles: this.state.roles.concat([addedRole])
+            });
+        })
+    }
+
+    onUpdateRow = (row) => {
+        fetch("/api/role/" + row.id, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(row),
+        })
+        .then(results => {
+            return results.json();
+        }).then(updatedRole => {
+            console.log("onUpdateRow", row, updatedRole, this.state.roles);
+            let roles = this.state.roles.filter(r => {
+                return r.id !== updatedRole.id;
+             });
+
+            this.setState({
+              roles: roles.concat([updatedRole])
+            });
+        })
+    }
+
+    onDeleteRow = (rows) => {
+        fetch("/api/role/" + rows[0], {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(rows[0]),
+        }).then(results => {
+            if(results.ok){
+                console.log("onDeleteRow", rows[0]);
+                const roles = this.state.roles.filter((role) => {
+                  return role.id !== rows[0];
+                });
+
+                this.setState({
+                  roles: roles
+                });
+            }
+        })
+    }
+
+    render() {
+        return(
+            <RolesTable roles={this.state.roles}
+                onAddRow={ this.onAddRow }
+                onDeleteRow={ this.onDeleteRow }
+                onUpdateRow = { this.onUpdateRow }
+            />
+        )
+    }
+}
+
+export default class RoleLayout extends Component{
+    render(){
+        return (
+               <Switch>
+                 <Route exact path='/role' component={AllRoles}/>
+               </Switch>
+        )
+    }
+}
 

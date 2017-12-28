@@ -25,9 +25,32 @@ class RolesEditor extends Component {
     getFieldValue(){
         return this.state.roles;
     }
-      updateData() {
+
+    updateData() {
         this.props.onUpdate(this.state.roles);
-      }
+    }
+
+    close = () => {
+        this.setState({ open: false });
+        this.props.onUpdate(this.props.defaultValue||[]);
+    }
+
+    _onToggleRole(event) {
+        const roleId = event.currentTarget.name;
+        const role = this.state.allroles.find(r => r.id === roleId);
+        let currentRoles = this.state.roles;
+
+        if (currentRoles.indexOf(role) < 0) {
+            currentRoles = currentRoles.concat([ role ]);
+        } else {
+            currentRoles = currentRoles.filter(r => r !== role);
+        }
+        this.setState({roles:currentRoles, allroles:this.state.allroles});
+    }
+
+    _hasRole(role) {
+        return this.state.roles.map(r => r.id).indexOf(role.id) > -1;
+    }
     render() {
         console.log("RolesEditor:render")
         const roleCheckBoxes = this.state.allroles.map(role => (
@@ -46,89 +69,16 @@ class RolesEditor extends Component {
         return (
           <div ref='inputRef' onBlur={this.handleBlur}>
             { roleCheckBoxes }
-            <button
-              className='btn btn-info btn-xs textarea-save-btn'
-              onClick={ this.updateData }>
-              save
-            </button>
+          <button type='button' className='btn btn-primary btn-xs' onClick={ this.updateData }>Save</button>
+          <button type='button' className='btn btn-default btn-xs' onClick={ this.close }>Close</button>
           </div>
         );
     }
 
-    _onToggleRole(event) {
-        const roleId = event.currentTarget.name;
-        const role = this.state.allroles.find(r => r.id === roleId);
-        let currentRoles = this.state.roles;
-
-        if (currentRoles.indexOf(role) < 0) {
-            currentRoles = currentRoles.concat([ role ]);
-        } else {
-            currentRoles = currentRoles.filter(r => r !== role);
-        }
-        this.setState({roles:currentRoles, allroles:this.state.allroles});
-
-        //this.setState({roles:this.currentRoles, allroles:this.state.allroles});
-//        if (this.state.roles.indexOf(role) < 0) {
-//          this.setState({ roles: this.state.roles.concat([ role ]) });
-//        } else {
-//          this.setState({ roles: this.state.roles.filter(r => r !== role) });
-//        }
-    }
-
-    _hasRole(role) {
-//        return this.props.row.roles.map(r => r.id).indexOf(role.id) > -1;
-        return this.state.roles.map(r => r.id).indexOf(role.id) > -1;
-    }
 }
 
-class NameEditor extends React.Component {
-  constructor(props) {
-    super(props);
-    this.updateData = this.updateData.bind(this);
-    this.state = {
-      name: props.defaultValue,
-      open: true
-    };
-  }
-  focus() {
-    this.refs.inputRef.focus();
-  }
-  updateData() {
-    this.props.onUpdate(this.state.name);
-  }
-  close = () => {
-    this.setState({ open: false });
-    this.props.onUpdate(this.props.defaultValue);
-  }
-  render() {
-    const fadeIn = this.state.open ? 'in' : '';
-    const display = this.state.open ? 'block' : 'none';
-    return (
-      <div className={ `modal fade ${fadeIn}` } id='myModal' role='dialog' style={ { display } }>
-        <div className='modal-dialog'>
-          <div className='modal-content'>
-            <div className='modal-body'>
-              <input
-                ref='inputRef'
-                className={ ( this.props.editorClass || '') + ' form-control editor edit-text' }
-                style={ { display: 'inline', width: '50%' } }
-                type='text'
-                value={ this.state.name }
-                onChange={ e => { this.setState({ name: e.currentTarget.value }); } } />
-            </div>
-            <div className='modal-footer'>
-              <button type='button' className='btn btn-primary' onClick={ this.updateData }>Save</button>
-              <button type='button' className='btn btn-default' onClick={ this.close }>Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
 
 const createRolesEditor = (onUpdate, props) => (<RolesEditor onUpdate={ onUpdate } {...props}/>);
-const createNameEditor = (onUpdate, props) => (<NameEditor onUpdate={ onUpdate } {...props}/>);
 
 const rolesFormatter = (roles, row) => (<span>{ (roles || []).map(r => r.rolename).join(', ') }</span>);
 
@@ -145,6 +95,11 @@ const rolesSortFunc = (a, b, order) => {   // order is desc or asc
 };
 
 class UsersTable extends React.Component {
+     onAfterSaveCell = (row, cellName, cellValue) => {
+        console.log("onAfterSaveCell", row, cellName, cellValue);
+        this.props.onUpdateRow(row);
+    }
+
     render() {
         return (
           <BootstrapTable
@@ -157,13 +112,15 @@ class UsersTable extends React.Component {
             } }
             tableBodyClass="table-striped"
             cellEdit={ {
-                mode: 'click'
+                mode: 'click',
+                blurToSave: true,
+                afterSaveCell: this.onAfterSaveCell  // a hook for after saving cell
             } }
             options={ {
                 onDeleteRow: this.props.onDeleteRow,
                 onAddRow: this.props.onAddRow,
-                defaultSortName: 'name',  // default sort column name
-                defaultSortOrder: 'asc'  // default sort order
+                defaultSortName: 'name',
+                defaultSortOrder: 'asc'
             } }
             insertRow deleteRow search pagination
             >
@@ -171,7 +128,6 @@ class UsersTable extends React.Component {
             <TableHeaderColumn dataField='userId' isKey dataSort>Användarid</TableHeaderColumn>
             <TableHeaderColumn dataField='name'
                 dataSort
-                customEditor={{ getElement: createNameEditor }}
             >Namn</TableHeaderColumn>
             <TableHeaderColumn dataField='roles'
                 dataSort
@@ -189,19 +145,16 @@ class UsersTable extends React.Component {
 class AllUsers extends Component{
     constructor(props) {
         super(props);
-        this.users = [];
-        this.state = { data: this.users};
+        this.state = { data: []};
     }
 
     componentDidMount(){
         fetch("/api/user")
         .then(results => {
             return results.json();
-        }).then(data => {
-            this.users = data;
-            this.setState({data:this.users});
+        }).then(users => {
+            this.setState({users:users});
         })
-
     }
 
     onAddRow = (row) => {
@@ -215,11 +168,33 @@ class AllUsers extends Component{
         })
         .then(results => {
             return results.json();
-        }).then(data => {
-            console.log("onAddRow", row, data);
-            this.users.push(data);
+        }).then(addedUser => {
+            console.log("onAddRow", row, addedUser);
             this.setState({
-              data: this.users
+              users: this.state.users.concat([addedUser])
+            });
+        })
+    }
+
+    onUpdateRow = (row) => {
+        fetch("/api/user/" + row.userId, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(row),
+        })
+        .then(results => {
+            return results.json();
+        }).then(updatedUser => {
+            console.log("onUpdateRow", row, updatedUser, this.state.users);
+            let users = this.state.users.filter(u => {
+                return u.userId !== updatedUser.userId;
+             });
+
+            this.setState({
+              users: users.concat([updatedUser])
             });
         })
     }
@@ -235,12 +210,12 @@ class AllUsers extends Component{
         }).then(results => {
             if(results.ok){
                 console.log("onDeleteRow", rows[0]);
-                this.users = this.users.filter((user) => {
+                const users = this.state.users.filter((user) => {
                   return user.userId !== rows[0];
                 });
 
                 this.setState({
-                  data: this.users
+                  users: users
                 });
             }
         })
@@ -249,9 +224,10 @@ class AllUsers extends Component{
 
     render() {
         return(
-            <UsersTable users={this.state.data}
-                onAddRow={ this.onAddRow }
-                onDeleteRow={ this.onDeleteRow }
+            <UsersTable users={this.state.users}
+                onAddRow = { this.onAddRow }
+                onDeleteRow = { this.onDeleteRow }
+                onUpdateRow = { this.onUpdateRow }
             />
         )
     }
