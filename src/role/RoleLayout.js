@@ -61,6 +61,7 @@ class AllRoles extends Component{
         .then(results => {
             return results.json();
         }).then(data => {
+            console.log("onAddRow", row, data);
             this.roles.push(data);
             this.setState({
               data: this.roles
@@ -68,14 +69,26 @@ class AllRoles extends Component{
         })
     }
 
-    onDeleteRow = (row) => {
-        this.users = this.users.filter((user) => {
-          return user.id !== row[0];
-        });
+    onDeleteRow = (rows) => {
+        fetch("/api/role/" + rows[0], {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(rows[0]),
+        }).then(results => {
+            if(results.ok){
+                console.log("onDeleteRow", rows[0]);
+                this.roles = this.roles.filter((role) => {
+                  return role.id !== rows[0];
+                });
 
-        this.setState({
-          data: this.users
-        });
+                this.setState({
+                  data: this.roles
+                });
+            }
+        })
     }
 
     render() {
@@ -97,7 +110,7 @@ class RolesTable extends React.Component {
         };
         const selectRow = {
             mode: 'radio',
-            hideSelectColumn: true,
+            hideSelectColumn: false,
             bgColor: 'lightgray',
             clickToSelect: true
         };
