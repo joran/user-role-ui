@@ -53,6 +53,15 @@ class RolesEditor extends Component {
     }
     render() {
         console.log("RolesEditor:render")
+        let buttons;
+        if(this.props.defaultValue){
+            buttons = (
+              <div>
+                  <button type='button' className='btn btn-primary btn-xs' onClick={ this.updateData }>Save</button>
+                  <button type='button' className='btn btn-default btn-xs' onClick={ this.close }>Close</button>
+              </div>
+            )
+        }
         const roleCheckBoxes = this.state.allroles.map(role => (
           <div key={ `span-${role.id}` }>
             <input
@@ -69,8 +78,7 @@ class RolesEditor extends Component {
         return (
           <div ref='inputRef' onBlur={this.handleBlur}>
             { roleCheckBoxes }
-          <button type='button' className='btn btn-primary btn-xs' onClick={ this.updateData }>Save</button>
-          <button type='button' className='btn btn-default btn-xs' onClick={ this.close }>Close</button>
+            { buttons }
           </div>
         );
     }
