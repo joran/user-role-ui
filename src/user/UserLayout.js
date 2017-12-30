@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import {BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
-
+import NotificationSystem from 'react-notification-system';
+import Constants from '../constants.js';
 
 class RolesEditor extends Component {
     constructor(props) {
         console.log("RolesEditor:consructor", props)
         super(props);
         this.updateData = this.updateData.bind(this);
-        this._onToggleRole = this._onToggleRole.bind(this);
-        this.state = {allroles: [], roles: props.defaultValue||[]   };
+        this.onChange = this.onChange.bind(this);
+        this.state = {allroles: [], roles: props.defaultValue||[]};
     }
 
     componentDidMount(){
@@ -35,7 +36,10 @@ class RolesEditor extends Component {
         this.props.onUpdate(this.props.defaultValue||[]);
     }
 
-    _onToggleRole(event) {
+    onBlur(event) {
+        console.log("handleBlur", event);
+    }
+    onChange(event) {
         const roleId = event.currentTarget.name;
         const role = this.state.allroles.find(r => r.id === roleId);
         let currentRoles = this.state.roles;
@@ -70,13 +74,13 @@ class RolesEditor extends Component {
               name={ role.id }
               checked={ this._hasRole(role) }
               onKeyDown={ this.props.onKeyDown }
-              onChange={ this._onToggleRole } />
+              onChange={ this.onChange } />
             <label key={ `label-${role}` } htmlFor={ role.id }> { role.rolename } </label>
           </div>
         ));
 
         return (
-          <div ref='inputRef' onBlur={this.handleBlur}>
+          <div ref='inputRef' tabIndex="0" onBlur={this.onBlur}>
             { roleCheckBoxes }
             { buttons }
           </div>
@@ -153,10 +157,14 @@ class UsersTable extends React.Component {
 class AllUsers extends Component{
     constructor(props) {
         super(props);
-        this.state = { data: []};
+        this._notificationSystem = null;
+        this.state = {
+            users: []
+        }
     }
 
     componentDidMount(){
+        this._notificationSystem = this.refs.notificationSystem;
         fetch("/api/user")
         .then(results => {
             return results.json();
@@ -181,6 +189,7 @@ class AllUsers extends Component{
             this.setState({
               users: this.state.users.concat([addedUser])
             });
+            this.notify(addedUser.name + " has been added");
         })
     }
 
@@ -194,7 +203,11 @@ class AllUsers extends Component{
             body: JSON.stringify(row),
         })
         .then(results => {
-            return results.json();
+            console.log("onUpdateRow", results);
+            if(results.ok) {
+                return results.json();
+            }
+            throw new Error("Could not update " + row.name + ": " + results.statusText);
         }).then(updatedUser => {
             console.log("onUpdateRow", row, updatedUser, this.state.users);
             let users = this.state.users.filter(u => {
@@ -204,7 +217,8 @@ class AllUsers extends Component{
             this.setState({
               users: users.concat([updatedUser])
             });
-        })
+            this.notify(updatedUser.name + " updated");
+        }).catch(error => this.notify(error, Constants.notification.ERROR))
     }
 
     onDeleteRow = (rows) => {
@@ -226,17 +240,32 @@ class AllUsers extends Component{
                   users: users
                 });
             }
+            this.notify("Failed to delete " + rows[0] + ": " + results.statusText, Constants.notification.ERROR)
         })
 
     }
 
+    notify = (msg, level=Constants.notification.SUCCESS) => {
+        this._notificationSystem.addNotification({
+            title: level === Constants.notification.ERROR ? "Sorry, something went wrong!" : "",
+            message: msg.toString(),
+            level: level,
+            position: "tc",
+            autoDismiss: level === "error" ? 0 : 5
+        });
+    }
+
     render() {
         return(
+            <div>
+            <NotificationSystem ref="notificationSystem" />
             <UsersTable users={this.state.users}
                 onAddRow = { this.onAddRow }
                 onDeleteRow = { this.onDeleteRow }
                 onUpdateRow = { this.onUpdateRow }
             />
+            </div>
+
         )
     }
 }
