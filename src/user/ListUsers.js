@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import NotificationSystem from 'react-notification-system';
 import Constants from '../constants.js';
 import UsersTable from './UsersTable'
+import MyTable, {MyTableHeader} from './Table'
+
+const rolesFormatter = ({data}) => (<span>{ (data.roles || []).map(r => r.rolename).join(', ') }</span>);
 
 export default class ListUsers extends Component{
     constructor(props) {
@@ -107,6 +110,18 @@ export default class ListUsers extends Component{
     }
 
     render() {
+        if(true){
+            return(
+                <div>
+                    <NotificationSystem ref="notificationSystem" />
+                    <MyTable data={this.state.users}>
+                        <MyTableHeader dataField="userId" isKey>Användarid</MyTableHeader>
+                        <MyTableHeader dataField="name">Namn</MyTableHeader>
+                        <MyTableHeader dataField="roles" dataFormatter={rolesFormatter}>Roller</MyTableHeader>
+                     </MyTable>
+                </div>
+            )
+        }
         return(
             <div>
             <NotificationSystem ref="notificationSystem" />
