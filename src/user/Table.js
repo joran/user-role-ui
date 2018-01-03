@@ -115,7 +115,7 @@ export default class MyTable extends Component{
     }
 
     renderBodyRow(rowData, keyFieldName, columns){
-        console.log("renderBodyRow", rowData, keyFieldName, columns)
+        console.log("MyTable.renderBodyRow", rowData, keyFieldName, columns)
         const rowKey = rowData[keyFieldName];
         const cols = columns.map(column =>
                 <MyTableCell key={rowKey+column.props.dataField}
