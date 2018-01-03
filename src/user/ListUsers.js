@@ -4,7 +4,7 @@ import Constants from '../constants.js';
 import UsersTable from './UsersTable'
 import MyTable, {MyTableHeader} from './Table'
 
-const rolesFormatter = ({data}) => (<span>{ (data.roles || []).map(r => r.rolename).join(', ') }</span>);
+const rolesFormatter = (rowData) => (rowData.roles || []).map(r => r.rolename).join(', ');
 
 export default class ListUsers extends Component{
     constructor(props) {
@@ -110,28 +110,20 @@ export default class ListUsers extends Component{
     }
 
     render() {
-        if(true){
-            return(
-                <div>
-                    <NotificationSystem ref="notificationSystem" />
-                    <MyTable data={this.state.users}>
-                        <MyTableHeader dataField="userId" isKey>Användarid</MyTableHeader>
-                        <MyTableHeader dataField="name">Namn</MyTableHeader>
-                        <MyTableHeader dataField="roles" dataFormatter={rolesFormatter}>Roller</MyTableHeader>
-                     </MyTable>
-                </div>
-            )
-        }
         return(
             <div>
-            <NotificationSystem ref="notificationSystem" />
-            <UsersTable users={this.state.users}
-                onAddRow = { this.onAddRow }
-                onDeleteRow = { this.onDeleteRow }
-                onUpdateRow = { this.onUpdateRow }
-            />
+                <NotificationSystem ref="notificationSystem" />
+                <MyTable data={this.state.users}>
+                    <MyTableHeader dataField="userId" dataSort isKey>Användarid</MyTableHeader>
+                    <MyTableHeader dataField="name" dataSort>Namn</MyTableHeader>
+                    <MyTableHeader dataField="roles" dataSort dataFormatter={rolesFormatter}>Roller</MyTableHeader>
+                </MyTable>
+                <UsersTable users={this.state.users}
+                    onAddRow = { this.onAddRow }
+                    onDeleteRow = { this.onDeleteRow }
+                    onUpdateRow = { this.onUpdateRow }
+                />
             </div>
-
         )
     }
 }
