@@ -26,6 +26,11 @@ export class MyTableHeader extends Component{
         this.dataFormatter = this.props.dataFormatter || this.dataFormatter;
         this.handleOnClick = (this.props.handleOnClick || this.handleOnClick).bind(this);
         this.compare = (this.props.compare || this.compare).bind(this);
+
+        if (this.props.defaultSort ){
+            const { dataField } = this.props;
+            this.props.handleDefaultSort(dataField, this.compare);
+        }
         console.log("MyTableHeader.constructor", this)
     }
 
@@ -73,19 +78,37 @@ export class MyTableHeader extends Component{
 
 export default class MyTable extends Component{
     constructor(props) {
-        console.log("MyTable.constructor", props)
         super(props);
         this.keyFieldName = this.props.children
             .map(child => child.props)
             .find(column => column.isKey)
             .dataField;
+
+        this.handleDefaultSort = this.handleDefaultSort.bind(this);
+
+        const defaultSortField = this.props.children
+            .map(child => child.props)
+            .find(column => column.defaultSort)
+
         this.state = {
+            defaultSortEnabled: defaultSortField !== undefined,
             sortingInfo:{
                 isSortedAsc:true,
                 compareFunction:(a,b)=>0,
                 sortedBy:undefined,
                 onDataSort:this.onDataSort.bind(this)}};
+        console.log("MyTable.constructor", this)
     };
+
+    handleDefaultSort(sortedBy, compareFunction){
+            const sortingInfo = {
+                ...this.state.sortingInfo,
+                isSortedAsc:true,
+                compareFunction:compareFunction,
+                sortedBy:sortedBy
+            };
+            this.setState({defaultSortEnabled:false, sortingInfo:sortingInfo});
+    }
 
     reverseCompare(compareFunction){
         return (a,b) =>  0 - compareFunction(a,b);
@@ -111,7 +134,10 @@ export default class MyTable extends Component{
         return (<MyTableHeader key={"header_"+child.props.dataField}
                     data={this.props.data}
                     sortingInfo={this.state.sortingInfo}
-                    {...child.props}/>)
+                    defaultSort={this.state.defaultSortEnabled ? child.props.defaultSort : undefined}
+                    handleDefaultSort={this.state.defaultSortEnabled ? this.handleDefaultSort : undefined}
+                    {...child.props}
+                    />)
     }
 
     renderBodyRow(rowData, keyFieldName, columns){

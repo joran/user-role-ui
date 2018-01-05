@@ -115,7 +115,7 @@ export default class ListUsers extends Component{
                 <NotificationSystem ref="notificationSystem" />
                 <MyTable data={this.state.users}>
                     <MyTableHeader dataField="userId" dataSort isKey>Användarid</MyTableHeader>
-                    <MyTableHeader dataField="name" dataSort>Namn</MyTableHeader>
+                    <MyTableHeader dataField="name" dataSort defaultSort>Namn</MyTableHeader>
                     <MyTableHeader dataField="roles" dataSort dataFormatter={rolesFormatter}>Roller</MyTableHeader>
                 </MyTable>
                 <UsersTable users={this.state.users}
