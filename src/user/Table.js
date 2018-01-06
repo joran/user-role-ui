@@ -47,8 +47,6 @@ export class MyTableHeader extends Component{
     }
 
     compare(thiz, other){
-        console.log("MyTableHeader.compare", thiz, other, this);
-
         const thizValue = this.dataFormatter(thiz).toLocaleLowerCase();
         const otherValue = this.dataFormatter(other).toLocaleLowerCase();
 
@@ -70,8 +68,13 @@ export class MyTableHeader extends Component{
     }
 
     render() {
+        if (this.props.dataSort){
+            return (
+                <th onClick={this.handleOnClick}>{this.headerValue} {this.dataSortIndicator()}</th>
+            )
+        }
         return (
-            <th onClick={this.handleOnClick}>{this.headerValue} {this.dataSortIndicator()}</th>
+            <th>{this.headerValue}</th>
         )
     }
 }
@@ -141,7 +144,6 @@ export default class MyTable extends Component{
     }
 
     renderBodyRow(rowData, keyFieldName, columns){
-        console.log("MyTable.renderBodyRow", rowData, keyFieldName, columns)
         const rowKey = rowData[keyFieldName];
         const cols = columns.map(column =>
                 <MyTableCell key={rowKey+column.props.dataField}
