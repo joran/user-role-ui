@@ -4,7 +4,7 @@ export default class RolesEditor extends Component {
     constructor(props) {
         console.log("RolesEditor:consructor", props)
         super(props);
-        this.updateData = this.updateData.bind(this);
+
         this.onChange = this.onChange.bind(this);
         this.state = {allroles: [], roles: props.defaultValue||[]};
     }
