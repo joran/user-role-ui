@@ -24,9 +24,7 @@
 import React from 'react';
 import { Grid, Navbar, Jumbotron, Nav, NavItem } from 'react-bootstrap';
 import { Switch, Route } from 'react-router-dom';
-import ListUsers from './user/ListUsers';
-import AddUser from './user/AddUser';
-import EditUser from './user/EditUser';
+import Users from './user/index';
 import RoleLayout from './role/RoleLayout';
 
 const Layout = () => (
@@ -35,9 +33,7 @@ const Layout = () => (
      <div className="container">
         <Switch>
           <Route exact path='/' component={Home}/>
-          <Route exact path='/user' component={ListUsers}/>
-          <Route exact path='/user/add' component={AddUser}/>
-          <Route exact path='/user/edit/:userId' component={EditUser}/>
+          <Route exact path='/user' component={Users}/>
           <Route exact path='/role' component={RoleLayout}/>
           <Route exact path='/about' component={About}/>
         </Switch>

@@ -1,45 +1,45 @@
-import React, { Component } from 'react';
-import { Table, Button, ButtonToolbar } from 'react-bootstrap';
-import { Link } from 'react-router-dom'
+import React, {Component} from 'react';
+import {Table, Button, ButtonToolbar} from 'react-bootstrap';
 
-export default class UsersTable extends Component{
-    constructor(props) {
-        super(props);
-        console.log("UsersTable.constructor", this)
-    };
-
-
-    render(){
+export default class UsersTable extends Component {
+    render() {
         console.log("UsersTable.render", this.props, this.state);
         const users = this.props.users;
         return (
             <Table striped bordered hover responsive>
                 <thead>
-                    <tr>
-                        <th>Användarid</th>
-                        <th>Namn</th>
-                        <th>Roller</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>Användarid</th>
+                    <th>Namn</th>
+                    <th>Roller</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    { users.map(d =>
-                        <tr key={d.userId}>
-                            <td>{d.userId}</td>
-                            <td>{d.name}</td>
-                            <td>{(d.roles || []).map(r => r.rolename).join(', ')}</td>
-                            <td>
-                                <div class="pull-right">
-                                    <ButtonToolbar>
-                                        <Link class="btn btn-primary btn-xs" to={`/user/edit/${d.userId}`}>Redigera</Link>
-                                        <Button bsStyle="danger" bsSize="xsmall">Ta bort</Button>
-                                    </ButtonToolbar>
-                                </div>
-                            </td>
-                        </tr>
-                    )}
+                {users.map(u =>
+                    <tr key={u.userId}>
+                        <td>{u.userId}</td>
+                        <td>{u.name}</td>
+                        <td>{(u.roles || []).map(r => r.rolename).join(', ')}</td>
+                        <td>
+                            <div className="pull-right">
+                                <ButtonToolbar>
+                                    <Button bsStyle="primary" bsSize="xsmall" onClick={() => this.handleEdit(u)}>Redigera</Button>
+                                    <Button bsStyle="danger" bsSize="xsmall" onClick={() => this.handleDelete(u)}>Ta bort</Button>
+                                </ButtonToolbar>
+                            </div>
+                        </td>
+                    </tr>
+                )}
                 </tbody>
             </Table>
         )
     }
+
+    constructor(props) {
+        super(props);
+        this.handleEdit = this.props.onEditUser;
+        this.handleDelete = this.props.onDeleteUser;
+        console.log("UsersTable.constructor", this)
+    };
 }
