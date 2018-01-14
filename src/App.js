@@ -55,10 +55,6 @@ const Navigation = () => (
               <NavItem eventKey={2} href="role">Roller</NavItem>
               <NavItem eventKey={3} href="about">Om</NavItem>
             </Nav>
-            <Nav pullRight>
-              <NavItem eventKey={4} href="user/add">Ny Användare</NavItem>
-              <NavItem eventKey={4} href="role/add">Ny Roll</NavItem>
-            </Nav>
       </Grid>
     </Navbar>
 )

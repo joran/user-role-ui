@@ -10,6 +10,7 @@ export default class Users extends Component {
                 <ButtonToolbar>
                     <Button onClick={this.createUser} bsSize="xsmall" >Ny Användare</Button>
                 </ButtonToolbar>
+                <br/>
                 <Table striped bordered hover responsive>
                     <thead>
                     <tr>
