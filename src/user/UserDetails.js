@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class AddUser extends Component{
+export default class UserDetails extends Component{
     render(){
         console.log("AddUser.render", this.props, this.state);
         const { userId, name, roles } = this.state;

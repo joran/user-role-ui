@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { $roles } from "../repository.js";
 
 export default class RolesEditor extends Component {
     constructor(props) {
@@ -11,12 +12,7 @@ export default class RolesEditor extends Component {
 
     componentDidMount(){
         console.log("RolesEditor:componentDidMount")
-        fetch("/api/role")
-        .then(results => {
-            return results.json();
-        }).then(data => {
-            this.setState({allroles:data, roles:this.state.roles});
-        })
+        $roles.getAll((roles) => this.setState({allroles:data}))
     }
 
     getFieldValue(){

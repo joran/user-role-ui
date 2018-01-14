@@ -1,17 +1,15 @@
 import React, { Component } from 'react';
-import {Button, ButtonToolbar} from 'react-bootstrap';
-import NotificationSystem from 'react-notification-system';
-import Constants from '../constants.js';
-import UsersTable from "./UsersTable";
-import { $users } from "../repository.js";
-import AddUser from "./AddUser";
-import EditUser from "./EditUser";
+import Notifications from '../Notifications';
+import Users from "./Users";
+import { $users, $roles } from "../repository.js";
+import UserDetails from "./UserDetails";
 
-export default class Users extends Component{
+
+export class Index extends Component{
     render() {
         return(
             <div>
-                <NotificationSystem ref="notificationSystem" />
+                <Notifications ref="notifications" />
                 {this.getSelectedView()}
             </div>
         )
@@ -21,51 +19,67 @@ export default class Users extends Component{
         const viewId = this.state.viewId;
         if(viewId === "list") {
             return (
-                <div>
-                    <UsersTable users={this.state.users} onDeleteUser={this.onDeleteUser} onEditUser={this.editUser}/>
-                    <ButtonToolbar>
-                        <Button onClick={this.addUser} bsSize="xsmall" >Ny Användare</Button>
-                    </ButtonToolbar>
-                </div>
+                <Users users={this.state.users} onDeleteUser={this.onDeleteUser} onEditUser={this.editUser}/>
             )
-        } else if(viewId === "add"){
+        } else if(viewId === "create"){
             return (
-                <AddUser onSubmit={this.onAddUser}/>
+                <UserDetails onSubmit={this.onCreateUser} notify={this.notify}/>
             )
         } else if(viewId === "edit"){
             return (
-                <AddUser user={this.state.selectedUser} userIdEditable={false} onSubmit={this.onUpdateUser}/>
+                <UserDetails user={this.state.selectedUser} onSubmit={this.onUpdateUser} notify={this.notify}/>
             )
         }
     }
 
     constructor(props) {
         super(props);
-        this._notificationSystem = null;
-        // this.notify = this.notify.bind(this);
-        this.onAddUser = this.onAddUser.bind(this);
-        this.onError = this.onError.bind(this);
-        this.editUser = this.editUser.bind(this);
-        this.addUser = this.addUser.bind(this);
         this.state = {
             users: [],
+            roles: [],
             viewId: "list"
         }
     }
 
     componentDidMount(){
-        this._notificationSystem = this.refs.notificationSystem;
-        this.loadUsers();
+        this.notify = this.refs.notifications;
+        this.loadAllUsers();
+        this.loadAllRoles()
     }
 
-    loadUsers = () => $users.getAll((users) => this.setState({users:users}), this.onError);
+    editUser = (user) => this.setState({viewId:"edit", selectedUser:user});
+
+    createUser = () => this.setState({viewId:"create"});
+
+    loadAllUsers = () => $users.getAll(this.afterLoadAllUsers, this.notify.error);
+
+    loadAllRoles = () => $roles.getAll(this.afterLoadAllRoles, this.notify.error);
+
+    onCreateUser = (newUser) => $users.create(newUser, this.afterAddUser, this.notify.error);
+
+    onUpdateUser = (user) => $users.update(user, this.afterUpdateUser, this.notify.error);
+
+    onDeleteUser = (user) => $users.remove(user, this.afterDeleteUser, this.notify.error);
+
+    afterLoadAllUsers = (users) => {
+        this.setState({
+            viewId: "list",
+            users: users
+        });
+    }
+
+    afterLoadAllRoles = (roles) => {
+        this.setState({
+            roles: roles
+        });
+    }
 
     afterAddUser = (addedUser) => {
         this.setState({
             viewId: "list",
             users: this.state.users.concat([addedUser])
         });
-        this.notify(addedUser.name + " has been added");
+        this.notify.success(addedUser.name + " has been added");
     }
 
     afterUpdateUser = (user) => {
@@ -78,7 +92,7 @@ export default class Users extends Component{
             selectedUser:undefined,
             users: users.concat([user])
         });
-        this.notify(user.name + " has been updated");
+        this.notify.success(user.name + " has been updated");
     }
 
     afterDeleteUser = (user) => {
@@ -89,29 +103,7 @@ export default class Users extends Component{
         this.setState({
             users: users
         });
-        this.notify(user.name + " has been deleted ")
-    }
-
-    editUser = (user) => this.setState({viewId:"edit", selectedUser:user});
-
-    addUser = () => this.setState({viewId:"add"});
-
-    onAddUser = (newUser) => $users.create(newUser, this.afterAddUser, this.onError);
-
-    onUpdateUser = (user) => $users.update(user, this.afterUpdateUser, this.onError);
-
-    onDeleteUser = (user) => $users.remove(user, this.afterDeleteUser, this.onError);
-
-    onError = (reason) => this.notify(reason, Constants.notification.ERROR);
-
-    notify = (msg, level=Constants.notification.SUCCESS) => {
-        this._notificationSystem.addNotification({
-            title: level === Constants.notification.ERROR ? "Sorry, something went wrong!" : "",
-            message: msg.toString(),
-            level: level,
-            position: "tc",
-            autoDismiss: level === "error" ? 0 : 5
-        });
+        this.notify.success(user.name + " has been deleted ")
     }
 
 }

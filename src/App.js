@@ -24,7 +24,7 @@
 import React from 'react';
 import { Grid, Navbar, Jumbotron, Nav, NavItem } from 'react-bootstrap';
 import { Switch, Route } from 'react-router-dom';
-import Users from './user/index';
+import {Index as Users} from './user/index';
 import RoleLayout from './role/RoleLayout';
 
 const Layout = () => (

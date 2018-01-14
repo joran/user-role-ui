@@ -12,4 +12,4 @@ import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render((<BrowserRouter><Layout /></BrowserRouter>), document.getElementById('root'));
 
-registerServiceWorker();
+//registerServiceWorker();
