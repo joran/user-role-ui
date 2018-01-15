@@ -56,3 +56,14 @@ ol, ul {
 .game-info {
   margin-left: 20px;
 }
+
+th.sorted-asc::after {
+  font-size: 0.8em;
+  padding: 0.2em;
+  content: "▲";
+}
+th.sorted-desc::after {
+  font-size: 0.8em;
+  padding: 0.2em;
+  content: "▼";
+}

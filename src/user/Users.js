@@ -3,20 +3,27 @@ import {Table, Button, ButtonToolbar} from 'react-bootstrap';
 
 export default class Users extends Component {
     render() {
-        console.log("UsersTable.render", this.props, this.state);
-        const users = this.props.users;
+        console.log("Users.render", this.props, this.state);
+
+        const fieldName = this.state.sortByFieldName;
+        const asc = this.state.sortOrderAsc;
+
+        let cls = {};
+        cls[fieldName] = asc ? "sorted-asc" : "sorted-desc";
+
+        const users = this.sortBy(fieldName, this.props.users);
         return (
             <div>
                 <ButtonToolbar>
-                    <Button onClick={this.createUser} bsSize="xsmall" >Ny Användare</Button>
+                    <Button onClick={this.props.onCreateUser} bsSize="xsmall" >Ny Användare</Button>
                 </ButtonToolbar>
                 <br/>
                 <Table striped bordered hover responsive>
                     <thead>
                     <tr>
-                        <th>Användarid</th>
-                        <th>Namn</th>
-                        <th>Roller</th>
+                        <th className={cls["userId"]} onClick={() => this.onSortBy("userId")}>Användarid</th>
+                        <th className={cls["name"]} onClick={() => this.onSortBy("name")}>Namn</th>
+                        <th className={cls["roles"]} onClick={() => this.onSortBy("roles")}>Roller</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -25,12 +32,12 @@ export default class Users extends Component {
                         <tr key={u.userId}>
                             <td>{u.userId}</td>
                             <td>{u.name}</td>
-                            <td>{(u.roles || []).map(r => r.rolename).join(', ')}</td>
+                            <td>{this.rolesDataFormatter(u.roles)}</td>
                             <td>
                                 <div className="pull-right">
                                     <ButtonToolbar>
-                                        <Button bsStyle="primary" bsSize="xsmall" onClick={() => this.handleEdit(u)}>Redigera</Button>
-                                        <Button bsStyle="danger" bsSize="xsmall" onClick={() => this.handleDelete(u)}>Ta bort</Button>
+                                        <Button bsStyle="primary" bsSize="xsmall" onClick={() => this.props.onEditUser(u)}>Redigera</Button>
+                                        <Button bsStyle="danger" bsSize="xsmall" onClick={() => this.props.onDeleteUser(u)}>Ta bort</Button>
                                     </ButtonToolbar>
                                 </div>
                             </td>
@@ -39,7 +46,7 @@ export default class Users extends Component {
                     </tbody>
                 </Table>
                 <ButtonToolbar>
-                    <Button onClick={this.createUser} bsSize="xsmall" >Ny Användare</Button>
+                    <Button onClick={this.props.onCreateUser} bsSize="xsmall" >Ny Användare</Button>
                 </ButtonToolbar>
             </div>
         )
@@ -47,8 +54,36 @@ export default class Users extends Component {
 
     constructor(props) {
         super(props);
-        this.handleEdit = this.props.editUser;
-        this.handleDelete = this.props.onDeleteUser;
-        console.log("UsersTable.constructor", this)
+
+        this.state = {
+            sortByFieldName: 'userId',
+            sortOrderAsc: true
+
+        }
+        console.log("Users.constructor", this)
     };
+
+    onSortBy(fieldName){
+        this.setState({
+            sortByFieldName:fieldName,
+            sortOrderAsc: fieldName === this.state.sortByFieldName ? !this.state.sortOrderAsc : true
+        });
+    }
+
+    sortBy(fieldName, users){
+        return users.sort((a,b) => {
+            const order = this.state.sortOrderAsc ? 1 : -1;
+            if(fieldName === "roles"){
+                const valueA = this.rolesDataFormatter(a.roles).toLocaleLowerCase();
+                const valueB = this.rolesDataFormatter(b.roles).toLocaleLowerCase();
+                return order * valueA.localeCompare(valueB)
+            }
+            const valueA = (a[fieldName]||"").toLocaleLowerCase();
+            const valueB = (b[fieldName]||"").toLocaleLowerCase();
+            return order * valueA.localeCompare(valueB)
+        })
+    }
+    rolesDataFormatter(roles) {
+        return (roles || []).map(r => r.rolename).join(', ')
+    }
 }

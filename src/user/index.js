@@ -19,7 +19,7 @@ export class Index extends Component{
         const viewId = this.state.viewId;
         if(viewId === "list") {
             return (
-                <Users users={this.state.users} onDeleteUser={this.onDeleteUser} onEditUser={this.editUser}/>
+                <Users users={this.state.users} onDeleteUser={this.onDeleteUser} onCreateUser={this.createUser} onEditUser={this.editUser}/>
             )
         } else if(viewId === "create"){
             return (

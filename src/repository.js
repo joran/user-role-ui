@@ -1,5 +1,5 @@
-//const HOST_API = "http://192.168.99.100:8080";
-const HOST_API = "http://" + window.location.hostname +  ":8080";
+const HOST_API = "http://192.168.99.100:8080";
+//const HOST_API = "http://" + window.location.hostname +  ":8080";
 //const HOST_API = "http://localhost:8080";
 const URI_USER_API = HOST_API + "/api/user";
 const URI_ROLE_API = HOST_API + "/api/role";
