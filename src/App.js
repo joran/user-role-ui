@@ -30,7 +30,7 @@ import RoleLayout from './role/RoleLayout';
 const Layout = () => (
    <div>
      <Navigation />
-     <div className="container">
+     <div className="container-fluid">
         <Switch>
           <Route exact path='/' component={Home}/>
           <Route exact path='/user' component={Users}/>
