@@ -23,11 +23,11 @@ export class Index extends Component{
             )
         } else if(viewId === "create"){
             return (
-                <UserDetails onSubmit={this.onCreateUser} notify={this.notify}/>
+                <UserDetails roles={this.state.roles} onSubmit={this.onCreateUser} notify={this.notify}/>
             )
         } else if(viewId === "edit"){
             return (
-                <UserDetails user={this.state.selectedUser} onSubmit={this.onUpdateUser} notify={this.notify}/>
+                <UserDetails user={this.state.selectedUser} roles={this.state.roles} onSubmit={this.onUpdateUser} notify={this.notify}/>
             )
         }
     }

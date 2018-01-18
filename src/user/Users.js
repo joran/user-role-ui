@@ -4,14 +4,13 @@ import {Table, Button, ButtonToolbar} from 'react-bootstrap';
 export default class Users extends Component {
     render() {
         console.log("Users.render", this.props, this.state);
+        const fieldName = this.state.sortByFieldName;
+        const filterValue = this.state.filterValue;
+        const users = this.sortBy(fieldName, this.filter(filterValue, this.props.users));
 
         let cls = {};
         const asc = this.state.sortOrderAsc;
         cls[fieldName] = asc ? "sorted-asc" : "sorted-desc";
-
-        const fieldName = this.state.sortByFieldName;
-        const filterValue = this.state.filterValue;
-        const users = this.sortBy(fieldName, this.filter(filterValue, this.props.users));
 
         return (
             <div>

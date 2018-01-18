@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import RolesEditor from './RolesEditor';
 
 export default class UserDetails extends Component{
     render(){
@@ -40,6 +41,7 @@ export default class UserDetails extends Component{
                         </div>
                         <div className="form-group">
                             <label>Roller</label>
+                            <RolesEditor selectedRoles={roles} selectableRoles={this.props.roles} onUpdate={this.handleSelectedRolesChange}/>
                             <input type="text" className="form-control" placeholder="Roller" value={roles} disabled="true"/>
                         </div>
                     </div>
@@ -59,6 +61,7 @@ export default class UserDetails extends Component{
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleSelectedRolesChange = this.handleSelectedRolesChange.bind(this);
         console.log("AddUser.constructor", this)
     };
     componentDidMount(){
@@ -77,12 +80,8 @@ export default class UserDetails extends Component{
 
         this.setState({ [name]: value });
     }
-
-//    handleInputChange(event) {
-//        const target = event.target;
-//        const value = target.type === 'checkbox' ? target.checked : target.value;
-//        const name = target.name;
-//        this.setState({ [name]: value });
-//    }
-
+    handleSelectedRolesChange(selectedRoles){
+        console.log("UserDetail.handleRolesChange", selectedRoles)
+        this.setState({roles:selectedRoles});
+    }
 }
